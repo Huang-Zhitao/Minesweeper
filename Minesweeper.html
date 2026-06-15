@@ -75,16 +75,17 @@ input[type="number"],select,input[type="range"]{padding:4px 6px;font-size:14px}
 .log-title{font-size:19px;font-weight:bold;text-align:center;margin-bottom:16px}
 .log-content{font-size:14px;line-height:1.7;color:#444}
 .log-content li{margin:7px 0;padding-left:4px}
+
 </style>
 </head>
 <body>
 <div class="log-mask" id="logMask">
 <div class="log-box">
 <button class="log-close" id="logCloseBtn">×</button>
-<div class="log-title">v2.3.7更新日志</div>
+<div class="log-title">v2.3.8更新日志</div>
 <div class="log-content">
 <ul>
-<li>🎨 优化透明效果与自定义皮肤的兼容性，视觉体验提升~</li>
+<li>✨ 修复且优化了一些问题~</li>
 <li style="font-size: 12px; color: #47c4ab; word-break: break-all;">如果你有宝贵的建议，请反馈到这个邮箱：hzt123321123@163.com</li>
 </ul>
 </div>
@@ -112,6 +113,7 @@ input[type="number"],select,input[type="range"]{padding:4px 6px;font-size:14px}
 <div class="tab-item" data-tab="adv">高级功能</div>
 <div class="tab-item" data-tab="data">数据管理</div>
 <div class="tab-item" data-tab="about">关于我们</div>
+<div class="tab-item" data-tab="Usage">使用方法</div>
 </div>
 <div class="tab-content">
 <div class="tab-panel active" data-panel="base">
@@ -119,15 +121,16 @@ input[type="number"],select,input[type="range"]{padding:4px 6px;font-size:14px}
 <div class="group-title">自定义对局参数</div>
 <div class="opt-row">
 <label>行数：</label>
-<input type="number" id="rowInput" min="5" max="30" value="16">
+<input type="number" id="rowInput" min="3" max="40" value="10">
 <label>列数：</label>
-<input type="number" id="colInput" min="5" max="40" value="16">
+<input type="number" id="colInput" min="3" max="40" value="10">
 <label>地雷总数：</label>
-<input type="number" id="mineInput" min="1" max="999" value="40">
+<input type="number" id="mineInput" min="1" max="999" value="30">
 </div>
 <div class="opt-row">
 <label>格子尺寸：</label>
 <select id="cellSizeSel">
+<option value="22">小号 24px</option>
 <option value="24">偏小 24px</option>
 <option value="26" selected>标准 26px</option>
 <option value="28">偏大 28px</option>
@@ -209,7 +212,7 @@ input[type="number"],select,input[type="range"]{padding:4px 6px;font-size:14px}
 <label class="switch-track" for="bombSwitch"></label>
 </div>
 <div class="opt-row switch-wrap">
-<label>幸运格子</label>
+<label>幸运格子[EV(实验版)]</label>
 <input class="switch-input" type="checkbox" id="luckySwitch">
 <label class="switch-track" for="luckySwitch"></label>
 </div>
@@ -225,7 +228,7 @@ input[type="number"],select,input[type="range"]{padding:4px 6px;font-size:14px}
 <div class="group-title">音量控制</div>
 <div class="opt-row">
 <label>总体音量：</label>
-<input type="range" id="volRange" min="0" max="100" value="60">
+<input type="range" id="volRange" min="0" max="100" value="65">
 <span id="volNum">60%</span>
 </div>
 <div class="opt-row switch-wrap">
@@ -316,17 +319,28 @@ input[type="number"],select,input[type="range"]{padding:4px 6px;font-size:14px}
 </div>
 <div class="tab-panel" data-panel="about">
   <div class="about-content" style="padding: 12px; line-height: 1.8; font-size: 14px;">
-    <div style="margin-bottom: 8px;">当前版本：v2.3.7</div>
+    <div style="margin-bottom: 8px;">当前版本：v2.3.8</div>
     <div style="margin-bottom: 8px;">制作团队：Leathy工作室</div>
     <div style="margin-bottom: 8px; font-size: 13px;">本游戏由 [Leathy工作室] 开发，旨在为玩家带来经典扫雷的乐趣，不断优化体验，欢迎大家游玩~</div>
     <div style="font-size: 12px; color: #47c4ab; word-break: break-all;">如果你有宝贵的建议，请反馈到这个邮箱：hzt123321123@163.com</div>
   </div>
 </div>
 </div>
+<div class="tab-panel" data-panel="Usage">
+    <h4 style="margin:0 0 8px; color:#0969da;">扫雷游戏使用说明</h4>
+    <p style="margin:4px 0; font-size:14px; line-height:1.5;">🔧 <strong>运行</strong>：双击HTML文件在浏览器打开，支持PC/手机，无需安装、无需联网</p>
+    <p style="margin:4px 0; font-size:14px; line-height:1.5;">⌨️ <strong>PC操作</strong>：左键翻格子（踩雷失败）| 右键标旗帜/双击标问号 | 快捷键：R/空格重置、M静音、ESC关弹窗</p>
+    <p style="margin:4px 0; font-size:14px; line-height:1.5;">📱 <strong>手机操作</strong>：点击翻格子 | 长按1秒标旗帜/2秒标问号 | 顶部表情按钮重置游戏</p>
+    <p style="margin:4px 0; font-size:14px; line-height:1.5;">🎮 <strong>核心规则</strong>：顶部显示剩余地雷/计时，齿轮按钮调难度/皮肤/音效；含普通雷（踩雷败）、连锁雷（连锁炸）、幸运格（清地雷）；翻完安全格且标对地雷胜利，踩雷/炸弹超时失败</p>
+    <p style="margin:4px 0; font-size:14px; line-height:1.5;">💾 <strong>其他</strong>：自动保存设置/排行榜，版本更新弹窗提示，刷新即可更最新版</p>
+  </div>
+  </div>
+</div>
+</div>
 </div>
 </div>
 <script>
-const GAME_VERSION = "v2.3.7";
+const GAME_VERSION = "v2.3.8";
 const VERSION_STORAGE_KEY = "mine_game_version";
 const SKIN_LIST = [
 {name:"经典原版",bg:"#cccccc",openBg:"#dddddd",outBorder:"2px outset #ffffff",inBorder:"1px solid #777777"},
