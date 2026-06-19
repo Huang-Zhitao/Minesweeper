@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -7,85 +6,113 @@
 <title>扫雷</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial;user-select:none;-webkit-tap-highlight-color:transparent}
-body{background:#f3f3f3;padding:16px;display:flex;flex-direction:column;align-items:center}
+body{background:#f3f3f3;padding:16px;display:flex;flex-direction:column;align-items:center;transition:background-color 0.3s ease;}
 .top-bar{display:flex;gap:14px;align-items:center;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
-.face{width:38px;height:38px;font-size:26px;border:2px solid #888;background:#ddd;border-radius:4px;cursor:pointer;transition:all 0.15s ease;box-shadow:2px 2px 4px #bbb}
-.face:active{background:#bbb;transform:scale(0.95)}
+.face{width:38px;height:38px;font-size:26px;border:2px solid #888;background:#ddd;border-radius:4px;cursor:pointer;transition:all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);box-shadow:2px 2px 4px #bbb;position:relative;overflow:hidden}
+.face:active{background:#bbb;transform:scale(0.95);box-shadow:1px 1px 2px #999}
 .info-text{font-size:18px;font-weight:500}
-.setting-btn{width:38px;height:38px;font-size:22px;border:2px solid #777;background:#e5e5e5;border-radius:4px;cursor:pointer;transition:all 0.15s ease;box-shadow:2px 2px 4px #ccc}
-.setting-btn:active{background:#ccc;transform:scale(0.95)}
-#game-box{border:3px solid #444;background:#999;padding:3px;box-shadow:4px 4px 10px #888}
+.setting-btn{width:38px;height:38px;font-size:22px;border:2px solid #777;background:#e5e5e5;border-radius:4px;cursor:pointer;transition:all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);box-shadow:2px 2px 4px #ccc}
+.setting-btn:active{background:#ccc;transform:scale(0.95);box-shadow:1px 1px 2px #888}
+#game-box{border:3px solid #444;background:#999;padding:3px;box-shadow:4px 4px 10px #888;transition:all 0.2s ease}
 .row{display:flex}
-.cell{display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;cursor:pointer;border-style:outset;border-width:2px;transition:all 0.14s ease-out}
-.cell.open{border-style:solid!important;transition:all 0.14s ease-out}
-.cell:hover:not(.open){filter:brightness(1.03)}
-.cell:active:not(.open){transform:scale(0.96)}
+.cell{display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;cursor:pointer;border-style:outset;border-width:2px;transition:all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);position:relative;overflow:hidden}
+.cell.open{border-style:solid!important;transition:all 0.2s ease-out}
+.cell:hover:not(.open){filter:brightness(1.03);transform:scale(1.02);z-index:2}
+.cell:active:not(.open){transform:scale(0.95);box-shadow:inset 1px 1px 3px rgba(0,0,0,0.2)}
 .c1{color:#0055ff}.c2{color:#009922}.c3{color:#ff2222}.c4{color:#000099}
 .c5{color:#881111}.c6{color:#009999}.c7{color:#222}.c8{color:#666}
 .s-mark{color:#c91919;font-weight:bold}
 .freeze{color:#0077cc}
 .countdown-bomb{color:#ff7700}
 .lucky-cell{color:#00bb44}
-.mask{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:99;display:none;align-items:center;justify-content:center;opacity:0.8;transition:opacity 0.25s ease}
-.mask.show{display:flex;opacity:0.92}
-.set-wrap{width:620px;max-width:94vw;max-height:86vh;background:#fff;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;transform:scale(0.93);transition:all 0.22s ease}
-.mask.show .set-wrap{transform:scale(1)}
+/* 弹窗动画优化 */
+.mask{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:99;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity 0.3s ease, visibility 0.3s ease;backdrop-filter:blur(2px);}
+.mask.show{opacity:0.92;visibility:visible;}
+.set-wrap{width:620px;max-width:94vw;max-height:86vh;background:#fff;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;transform:scale(0.9) translateY(20px);opacity:0;transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);box-shadow:0 8px 24px rgba(0,0,0,0.15);}
+.mask.show .set-wrap{transform:scale(1) translateY(0);opacity:1;}
 .set-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #ddd}
 .set-title{font-size:18px;font-weight:bold}
-.close-set{font-size:22px;cursor:pointer;padding:0 8px}
-.tab-nav{display:flex;border-bottom:1px solid #ddd}
-.tab-item{padding:10px 12px;cursor:pointer;border-bottom:3px solid transparent;font-size:14px;transition:all 0.15s}
-.tab-item.active{border-bottom-color:#2277ee;color:#2277ee;font-weight:bold}
+.close-set{font-size:22px;cursor:pointer;padding:0 8px;transition:all 0.2s ease;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;}
+.close-set:hover{background:#f5f5f5;color:#f33;transform:rotate(90deg);}
+/* 标签页切换动画 */
+.tab-nav{display:flex;border-bottom:1px solid #ddd;position:relative;}
+.tab-item{padding:10px 12px;cursor:pointer;border-bottom:3px solid transparent;font-size:14px;transition:all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);position:relative;z-index:1;}
+.tab-item.active{border-bottom-color:#2277ee;color:#2277ee;font-weight:bold;transform:translateY(-2px);}
 .tab-content{flex:1;padding:14px;overflow-y:auto}
-.tab-panel{display:none}
-.tab-panel.active{display:block}
+.tab-panel{display:none;opacity:0;transform:translateX(10px);transition:opacity 0.3s ease, transform 0.3s ease;}
+.tab-panel.active{display:block;opacity:1;transform:translateX(0);}
 .group{margin-bottom:16px}
 .group-title{font-size:15px;margin-bottom:8px;font-weight:bold}
 .opt-row{display:flex;align-items:center;gap:8px;margin:7px 0;flex-wrap:wrap}
 label{font-size:14px}
-input[type="number"],select,input[type="range"]{padding:4px 6px;font-size:14px}
-.btn-sm{padding:5px 10px;border:1px solid #888;background:#eee;border-radius:3px;cursor:pointer;font-size:14px;transition:all 0.15s}
-.btn-sm:active{background:#ddd}
+input[type="number"],select,input[type="range"]{padding:4px 6px;font-size:14px;border-radius:4px;border:1px solid #ddd;transition:all 0.2s ease;}
+input[type="number"]:focus,select:focus,input[type="range"]:focus{outline:none;border-color:#2277ee;box-shadow:0 0 0 2px rgba(34, 119, 238, 0.1);}
+.btn-sm{padding:5px 10px;border:1px solid #888;background:#eee;border-radius:4px;cursor:pointer;font-size:14px;transition:all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);position:relative;overflow:hidden;}
+.btn-sm:hover{background:#e0e0e0;border-color:#666;transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+.btn-sm:active{background:#ddd;transform:translateY(0);box-shadow:inset 1px 1px 3px rgba(0,0,0,0.1);}
+/* 皮肤选择动画 */
 .skin-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
-.skin-item{height:36px;border:2px solid #aaa;border-radius:3px;cursor:pointer;transition:all 0.15s ease}
-.skin-item.active{border:3px solid #2277ee}
-.skin-more{height:36px;border:2px dashed #888;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;color:#666;transition:all 0.15s}
-.skin-more:hover{background:#eee;color:#2277ee;border-color:#2277ee}
-.color-pop{position:relative;margin-top:12px;padding:16px;border:1px solid #ddd;border-radius:6px;background:#fafafa;display:none}
-.color-pop.show{display:block}
+.skin-item{height:36px;border:2px solid #aaa;border-radius:4px;cursor:pointer;transition:all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);position:relative;overflow:hidden;}
+.skin-item:hover{transform:scale(1.05);border-color:#888;}
+.skin-item.active{border:3px solid #2277ee;transform:scale(1.08);box-shadow:0 0 0 2px rgba(34, 119, 238, 0.2);}
+.skin-more{height:36px;border:2px dashed #888;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;color:#666;transition:all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);}
+.skin-more:hover{background:#f5f9ff;color:#2277ee;border-color:#2277ee;transform:scale(1.05);}
+.color-pop{position:relative;margin-top:12px;padding:16px;border:1px solid #ddd;border-radius:6px;background:#fafafa;display:none;opacity:0;transform:scale(0.95);transition:all 0.2s ease;}
+.color-pop.show{display:block;opacity:1;transform:scale(1);}
 .color-row{display:flex;justify-content:space-between;align-items:center;margin:9px 0}
 .color-row label{width:130px}
-.color-row input[type="color"]{width:46px;height:34px;border:none;border-radius:4px;cursor:pointer;box-shadow:1px 1px 4px #ccc}
-.color-close{position:absolute;right:10px;top:8px;width:24px;height:24px;text-align:center;line-height:24px;cursor:pointer;font-size:18px;color:#777}
-.color-close:hover{color:#f33}
+.color-row input[type="color"]{width:46px;height:34px;border:none;border-radius:4px;cursor:pointer;box-shadow:1px 1px 4px #ccc;transition:all 0.2s ease;}
+.color-row input[type="color"]:hover{transform:scale(1.05);box-shadow:2px 2px 6px #bbb;}
+.color-close{position:absolute;right:10px;top:8px;width:24px;height:24px;text-align:center;line-height:24px;cursor:pointer;font-size:18px;color:#777;transition:all 0.2s ease;border-radius:50%;}
+.color-close:hover{color:#f33;transform:rotate(90deg);background:#f5f5f5;}
+/* 开关动画优化 */
 .switch-wrap{display:flex;align-items:center;justify-content:space-between;width:100%}
 .switch-input{display:none}
-.switch-track{width:46px;height:24px;background:#cccccc;border-radius:99px;position:relative;cursor:pointer;transition:background 0.2s ease;box-shadow:inset 1px 1px 3px #bbb}
-.switch-track::after{content:"";width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:all 0.2s ease;box-shadow:0 1px 3px #aaa}
+.switch-track{width:46px;height:24px;background:#cccccc;border-radius:99px;position:relative;cursor:pointer;transition:background 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);box-shadow:inset 1px 1px 3px #bbb;}
+.switch-track::after{content:"";width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);box-shadow:0 1px 3px #aaa;}
 .switch-input:checked + .switch-track{background:#34c759}
-.switch-input:checked + .switch-track::after{left:25px}
-.rank-box{margin-top:14px;padding:10px;border:1px solid #ccc;background:#fff;width:420px;max-width:95vw}
+.switch-input:checked + .switch-track::after{left:25px;transform:scale(1.1);}
+.rank-box{margin-top:14px;padding:10px;border:1px solid #ccc;background:#fff;width:420px;max-width:95vw;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
 .rank-tit{font-weight:bold;margin-bottom:6px}
-.log-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:none;align-items:center;justify-content:center;opacity:0.8;transition:opacity 0.28s ease}
-.log-mask.show{display:flex;opacity:0.92}
-.log-box{width:380px;max-width:92vw;background:#fff;border-radius:12px;padding:22px;position:relative;transform:scale(0.85);transition:transform 0.28s ease;box-shadow:0 6px 24px rgba(0,0,0,0.22)}
-.log-mask.show .log-box{transform:scale(1)}
-.log-close{position:absolute;right:16px;top:14px;width:28px;height:28px;border-radius:50%;border:none;background:#eee;font-size:18px;cursor:pointer;text-align:center;line-height:28px;transition:all 0.15s}
-.log-close:hover{background:#ddd}
+/* 更新日志弹窗动画 */
+.log-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity 0.3s ease, visibility 0.3s ease;backdrop-filter:blur(3px);}
+.log-mask.show{opacity:0.92;visibility:visible;}
+.log-box{width:380px;max-width:92vw;background:#fff;border-radius:12px;padding:22px;position:relative;transform:scale(0.85) translateY(-20px);opacity:0;transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);box-shadow:0 8px 24px rgba(0,0,0,0.22);}
+.log-mask.show .log-box{transform:scale(1) translateY(0);opacity:1;}
+.log-close{position:absolute;right:16px;top:14px;width:28px;height:28px;border-radius:50%;border:none;background:#eee;font-size:18px;cursor:pointer;text-align:center;line-height:28px;transition:all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);}
+.log-close:hover{background:#ddd;transform:scale(1.1) rotate(90deg);}
 .log-title{font-size:19px;font-weight:bold;text-align:center;margin-bottom:16px}
 .log-content{font-size:14px;line-height:1.7;color:#444}
 .log-content li{margin:7px 0;padding-left:4px}
 
+/* 滚动条美化 */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:#f5f5f5;border-radius:3px;}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px;transition:all 0.2s ease;}
+::-webkit-scrollbar-thumb:hover{background:#999;}
 </style>
 </head>
 <body>
 <div class="log-mask" id="logMask">
 <div class="log-box">
 <button class="log-close" id="logCloseBtn">×</button>
-<div class="log-title">v2.3.8更新日志</div>
+<div class="log-title">v2.4.9更新日志</div>
 <div class="log-content">
 <ul>
-<li>✨ 修复且优化了一些问题~</li>
+<li style="font-size: 12px">✨ 全局动画全面升级，所有交互元素新增丝滑过渡效果</li>
+<li style="font-size: 12px">✨ 设置弹窗/更新日志弹窗增加淡入淡出+缩放+位移组合动画</li>
+<li style="font-size: 12px">✨ 按钮、开关、皮肤选择等控件新增hover/active态精细动画</li>
+<li style="font-size: 12px">✨ 格子交互优化：hover轻微放大、active按压效果更自然</li>
+<li style="font-size: 12px">✨ 标签页切换增加平滑过渡动画，设置面板操作更流畅</li>
+<li style="font-size: 12px">🐞 修复触屏长按插旗偶尔触发多次的问题</li>
+<li style="font-size: 12px">🐞 修复自定义颜色面板关闭后再次打开颜色值重置的问题</li>
+<li style="font-size: 12px">🐞 修复限时模式倒计时结束后仍能操作格子的问题</li>
+<li style="font-size: 12px">🐞 修复快捷难度切换后格子尺寸未同步刷新的问题</li>
+<li style="font-size: 12px">🐞 修复音量滑块拖动时数值显示延迟的问题</li>
+<li style="font-size: 12px">🔧 优化音频播放逻辑，避免快速操作时音效重叠</li>
+<li style="font-size: 12px">🔧 优化本地存储逻辑，设置保存更稳定</li>
+<li style="font-size: 12px">🔧 优化胜利/失败判定逻辑，减少误判情况</li>
+<li style="font-size: 12px">🎨 调整部分UI细节，提升整体视觉体验</li>
 <li style="font-size: 12px; color: #47c4ab; word-break: break-all;">如果你有宝贵的建议，请反馈到这个邮箱：hzt123321123@163.com</li>
 </ul>
 </div>
@@ -130,7 +157,7 @@ input[type="number"],select,input[type="range"]{padding:4px 6px;font-size:14px}
 <div class="opt-row">
 <label>格子尺寸：</label>
 <select id="cellSizeSel">
-<option value="22">小号 24px</option>
+<option value="22">小号 22px</option>
 <option value="24">偏小 24px</option>
 <option value="26" selected>标准 26px</option>
 <option value="28">偏大 28px</option>
@@ -229,7 +256,7 @@ input[type="number"],select,input[type="range"]{padding:4px 6px;font-size:14px}
 <div class="opt-row">
 <label>总体音量：</label>
 <input type="range" id="volRange" min="0" max="100" value="65">
-<span id="volNum">60%</span>
+<span id="volNum">65%</span>
 </div>
 <div class="opt-row switch-wrap">
 <label>全局静音</label>
@@ -319,12 +346,11 @@ input[type="number"],select,input[type="range"]{padding:4px 6px;font-size:14px}
 </div>
 <div class="tab-panel" data-panel="about">
   <div class="about-content" style="padding: 12px; line-height: 1.8; font-size: 14px;">
-    <div style="margin-bottom: 8px;">当前版本：v2.3.8</div>
+    <div style="margin-bottom: 8px;">当前版本：v2.4.9</div>
     <div style="margin-bottom: 8px;">制作团队：Leathy工作室</div>
     <div style="margin-bottom: 8px; font-size: 13px;">本游戏由 [Leathy工作室] 开发，旨在为玩家带来经典扫雷的乐趣，不断优化体验，欢迎大家游玩~</div>
     <div style="font-size: 12px; color: #47c4ab; word-break: break-all;">如果你有宝贵的建议，请反馈到这个邮箱：hzt123321123@163.com</div>
   </div>
-</div>
 </div>
 <div class="tab-panel" data-panel="Usage">
     <h4 style="margin:0 0 8px; color:#0969da;">扫雷游戏使用说明</h4>
@@ -334,13 +360,13 @@ input[type="number"],select,input[type="range"]{padding:4px 6px;font-size:14px}
     <p style="margin:4px 0; font-size:14px; line-height:1.5;">🎮 <strong>核心规则</strong>：顶部显示剩余地雷/计时，齿轮按钮调难度/皮肤/音效；含普通雷（踩雷败）、连锁雷（连锁炸）、幸运格（清地雷）；翻完安全格且标对地雷胜利，踩雷/炸弹超时失败</p>
     <p style="margin:4px 0; font-size:14px; line-height:1.5;">💾 <strong>其他</strong>：自动保存设置/排行榜，版本更新弹窗提示，刷新即可更最新版</p>
   </div>
-  </div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <script>
-const GAME_VERSION = "v2.3.8";
+const GAME_VERSION = "v2.4.9";
 const VERSION_STORAGE_KEY = "mine_game_version";
 const SKIN_LIST = [
 {name:"经典原版",bg:"#cccccc",openBg:"#dddddd",outBorder:"2px outset #ffffff",inBorder:"1px solid #777777"},
@@ -360,7 +386,7 @@ skinIdx:0, longPress:700, delay:120,
 mode:"classic", limitTime:180,
 chainMine:true, bomb:false, lucky:false, freeze:false,
 autoOpen:true, firstSafe:true, useQmark:true,
-volume:60, mute:false,
+volume:65, mute:false,
 sClick:true, sFlag:true, sBoom:true, sWin:true, sSpecial:true,
 customNormal:"#cccccc",
 customOpen:"#dddddd",
@@ -376,8 +402,11 @@ let gameOver = false, timerId = null, startTime = null, remainMine = 0;
 let faceState = "normal";
 let pressTimer = null, lastOperate = 0;
 let fogOpacity = 0.6, limitCountdown = 0, limitTimer = null;
+// 音频播放防抖
+let audioPlayTimer = null;
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
+
 function initUpdateLog(){
 const mask = $("#logMask");
 const closeBtn = $("#logCloseBtn");
@@ -390,6 +419,7 @@ mask.classList.remove("show");
 localStorage.setItem(VERSION_STORAGE_KEY, GAME_VERSION);
 }
 }
+
 function renderSkinList(){
 const box = $("#skinBox");
 box.innerHTML = "";
@@ -409,51 +439,63 @@ refreshAllCell();
 box.appendChild(div);
 })
 }
+
 function bindColorPanel(){
 const openBtn = $("#openColorBtn");
 const closeBtn = $("#closeColorBtn");
 const panel = $("#colorPanel");
-openBtn.onclick = ()=>panel.classList.add("show");
+openBtn.onclick = ()=>{
+panel.classList.add("show");
+// 修复颜色值重置问题 - 重新赋值当前设置的颜色
+$("#colorNormal").value = SETTING.customNormal;
+$("#colorOpen").value = SETTING.customOpen;
+$("#colorOutBorder").value = SETTING.customOutBorder.replace(/[^#0-9a-fA-F]/g, '');
+$("#colorInBorder").value = SETTING.customInBorder.replace(/[^#0-9a-fA-F]/g, '');
+$("#colorBodyBg").value = SETTING.customBodyBg;
+};
 closeBtn.onclick = ()=>panel.classList.remove("show");
-const colorNormal = $("#colorNormal");
-const colorOpen = $("#colorOpen");
-const colorOutBorder = $("#colorOutBorder");
-const colorInBorder = $("#colorInBorder");
-const colorBodyBg = $("#colorBodyBg");
-colorNormal.value = SETTING.customNormal;
-colorOpen.value = SETTING.customOpen;
-colorOutBorder.value = SETTING.customOutBorder;
-colorInBorder.value = SETTING.customInBorder;
-colorBodyBg.value = SETTING.customBodyBg;
+
+// 初始化颜色面板值
+$("#colorNormal").value = SETTING.customNormal;
+$("#colorOpen").value = SETTING.customOpen;
+$("#colorOutBorder").value = SETTING.customOutBorder.replace(/[^#0-9a-fA-F]/g, '');
+$("#colorInBorder").value = SETTING.customInBorder.replace(/[^#0-9a-fA-F]/g, '');
+$("#colorBodyBg").value = SETTING.customBodyBg;
+
 function applyColor(){
 SETTING.useCustomColor = true;
-SETTING.customNormal = colorNormal.value;
-SETTING.customOpen = colorOpen.value;
-SETTING.customOutBorder = `2px outset ${colorOutBorder.value}`;
-SETTING.customInBorder = `1px solid ${colorInBorder.value}`;
-SETTING.customBodyBg = colorBodyBg.value;
+SETTING.customNormal = $("#colorNormal").value;
+SETTING.customOpen = $("#colorOpen").value;
+SETTING.customOutBorder = `2px outset ${$("#colorOutBorder").value}`;
+SETTING.customInBorder = `1px solid ${$("#colorInBorder").value}`;
+SETTING.customBodyBg = $("#colorBodyBg").value;
 document.body.style.background = SETTING.customBodyBg;
 saveSetting();
 refreshAllCell();
 renderSkinList();
 }
-colorNormal.oninput = applyColor;
-colorOpen.oninput = applyColor;
-colorOutBorder.oninput = applyColor;
-colorInBorder.oninput = applyColor;
-colorBodyBg.oninput = applyColor;
+
+$("#colorNormal").addEventListener("input", applyColor);
+$("#colorOpen").addEventListener("input", applyColor);
+$("#colorOutBorder").addEventListener("input", applyColor);
+$("#colorInBorder").addEventListener("input", applyColor);
+$("#colorBodyBg").addEventListener("input", applyColor);
+
 $("#resetCustomColor").onclick = function(){
 SETTING.useCustomColor = false;
 SETTING.customNormal = "#cccccc";
 SETTING.customOpen = "#dddddd";
-SETTING.customOutBorder = "#ffffff";
-SETTING.customInBorder = "#777777";
+SETTING.customOutBorder = "2px outset #ffffff";
+SETTING.customInBorder = "1px solid #777777";
 SETTING.customBodyBg = "#f3f3f3";
-colorNormal.value = SETTING.customNormal;
-colorOpen.value = SETTING.customOpen;
-colorOutBorder.value = SETTING.customOutBorder;
-colorInBorder.value = SETTING.customInBorder;
-colorBodyBg.value = SETTING.customBodyBg;
+
+// 更新颜色输入框值
+$("#colorNormal").value = SETTING.customNormal;
+$("#colorOpen").value = SETTING.customOpen;
+$("#colorOutBorder").value = "#ffffff";
+$("#colorInBorder").value = "#777777";
+$("#colorBodyBg").value = SETTING.customBodyBg;
+
 document.body.style.background = SETTING.customBodyBg;
 saveSetting();
 refreshAllCell();
@@ -461,6 +503,7 @@ renderSkinList();
 panel.classList.remove("show");
 }
 }
+
 function bindTabSwitch(){
 $$(".tab-item").forEach(tab=>{
 tab.onclick = function(){
@@ -468,38 +511,61 @@ const key = this.dataset.tab;
 $$(".tab-item").forEach(t=>t.classList.remove("active"));
 this.classList.add("active");
 $$(".tab-panel").forEach(p=>p.classList.remove("active"));
-$(`.tab-panel[data-panel="${key}"]`).classList.add("active");
+const targetPanel = $(`.tab-panel[data-panel="${key}"]`);
+// 延迟激活面板以触发过渡动画
+setTimeout(() => {
+targetPanel.classList.add("active");
+}, 50);
 }
 })
 }
-let audioCtx = null;
+
+// 优化音频播放逻辑 - 防抖避免音效重叠
+let audioPlaying = false;
 function createAudio(){
-if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+return window.audioCtx;
 }
+
 function playAudio(type){
 if(SETTING.mute || SETTING.volume <= 0) return;
-createAudio();
-const ctx = audioCtx;
+
+// 根据类型判断是否需要防抖
+const needDebounce = ["click", "flag"].includes(type);
+if(needDebounce && audioPlaying) return;
+
+audioPlaying = true;
+const ctx = createAudio();
 const osc = ctx.createOscillator();
 const gain = ctx.createGain();
 osc.connect(gain);
 gain.connect(ctx.destination);
+
 const vol = SETTING.volume / 100;
 let freq = 0, toneType = "sine", gainVal = 0;
+
 switch(type){
-case "click": if(!SETTING.sClick)return; freq=620;toneType="sine";gainVal=0.11*vol;break;
-case "flag": if(!SETTING.sFlag)return; freq=430;toneType="square";gainVal=0.09*vol;break;
-case "boom": if(!SETTING.sBoom)return; freq=110;toneType="sawtooth";gainVal=0.22*vol;break;
-case "win": if(!SETTING.sWin)return; freq=780;toneType="sine";gainVal=0.12*vol;break;
-case "special": if(!SETTING.sSpecial)return; freq=550;toneType="triangle";gainVal=0.1*vol;break;
+case "click": if(!SETTING.sClick) return; freq=620; toneType="sine"; gainVal=0.11*vol; break;
+case "flag": if(!SETTING.sFlag) return; freq=430; toneType="square"; gainVal=0.09*vol; break;
+case "boom": if(!SETTING.sBoom) return; freq=110; toneType="sawtooth"; gainVal=0.22*vol; break;
+case "win": if(!SETTING.sWin) return; freq=780; toneType="sine"; gainVal=0.12*vol; break;
+case "special": if(!SETTING.sSpecial) return; freq=550; toneType="triangle"; gainVal=0.1*vol; break;
 }
+
 osc.type = toneType;
 osc.frequency.value = freq;
 gain.gain.value = gainVal;
+
 osc.start();
 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
 osc.stop(ctx.currentTime + 0.25);
+
+// 防抖超时
+setTimeout(() => {
+audioPlaying = false;
+}, 80);
 }
+
 function setFace(state){
 faceState = state;
 const el = $("#faceBtn");
@@ -510,6 +576,7 @@ case "win": el.textContent="😎"; break;
 case "lose": el.textContent="😵"; break;
 }
 }
+
 function initMapData(){
 const {row,col,mine} = SETTING;
 mineMap = Array(row).fill().map(()=>Array(col).fill(0));
@@ -524,6 +591,7 @@ stopTimer();
 clearInterval(limitTimer);
 limitCountdown = SETTING.limitTime;
 }
+
 function buildAllBlock(){
 const {row,col,mine,chainMine,bomb,lucky,freeze} = SETTING;
 let m = 0;
@@ -535,6 +603,7 @@ mineMap[r][c] = -1;
 m++;
 }
 }
+
 if(chainMine){
 const groupNum = Math.floor((row * col) / 40);
 for(let g = 0; g < groupNum; g++){
@@ -560,6 +629,7 @@ chainMineList.push(group);
 group.forEach(p=>mineMap[p.r][p.c] = -2);
 }
 }
+
 if(bomb){
 const bombNum = Math.floor((row*col)/60)+1;
 let n=0;
@@ -573,6 +643,7 @@ n++;
 }
 }
 }
+
 if(lucky){
 const lkNum = Math.floor((row*col)/70)+1;
 let n=0;
@@ -586,6 +657,7 @@ n++;
 }
 }
 }
+
 if(freeze){
 const frNum = Math.floor((row*col)/70)+1;
 let n=0;
@@ -599,8 +671,10 @@ n++;
 }
 }
 }
+
 fillNumber();
 }
+
 function getAroundMine(r,c){
 let cnt = 0;
 const {row,col} = SETTING;
@@ -615,6 +689,7 @@ if(mineMap[nr][nc]===-1 || mineMap[nr][nc]===-2) cnt++;
 }
 return cnt;
 }
+
 function fillNumber(){
 const {row,col} = SETTING;
 for(let r=0;r<row;r++){
@@ -625,6 +700,7 @@ mineMap[r][c] = getAroundMine(r,c);
 }
 }
 }
+
 function renderBoard(){
 $("#game-box").innerHTML = "";
 const {row,col,cellSize} = SETTING;
@@ -639,24 +715,43 @@ cell.dataset.c = c;
 cell.style.width = cellSize + "px";
 cell.style.height = cellSize + "px";
 cell.style.fontSize = (cellSize * 0.6) + "px";
+
+// PC端事件
 cell.onmousedown = function(e){
 e.preventDefault();
+if(gameOver) return; // 修复限时结束后仍能操作的问题
 setFace("worry");
 if(e.button === 0) openCell(r,c);
 else if(e.button === 2) toggleFlag(r,c);
-}
+};
 cell.onmouseup = function(){
-setFace("normal");
-}
+if(!gameOver) setFace("normal");
+};
 cell.oncontextmenu = e=>e.preventDefault();
-cell.addEventListener("touchstart", function(){
+
+// 移动端事件 - 修复长按多次触发问题
+let pressStartTime = 0;
+let pressTimer = null;
+cell.addEventListener("touchstart", function(e){
+e.preventDefault();
+if(gameOver) return; // 修复限时结束后仍能操作的问题
+pressStartTime = Date.now();
 clearTimeout(pressTimer);
 pressTimer = setTimeout(()=>{
+// 增加长按时间判断，避免误触发
+if(Date.now() - pressStartTime >= SETTING.longPress - 100){
 toggleFlag(r,c);
+}
 }, SETTING.longPress);
 });
-cell.addEventListener("touchend", ()=>clearTimeout(pressTimer));
-cell.addEventListener("touchmove", ()=>clearTimeout(pressTimer));
+
+cell.addEventListener("touchend", ()=>{
+clearTimeout(pressTimer);
+});
+cell.addEventListener("touchmove", ()=>{
+clearTimeout(pressTimer);
+});
+
 rowDom.appendChild(cell);
 }
 $("#game-box").appendChild(rowDom);
@@ -664,9 +759,11 @@ $("#game-box").appendChild(rowDom);
 refreshAllCell();
 updateMineShow();
 }
+
 function refreshCell(r,c){
 const cell = $(`.cell[data-r="${r}"][data-c="${c}"]`);
 if(!cell) return;
+
 let skin;
 if(SETTING.useCustomColor){
 skin = {
@@ -674,29 +771,34 @@ bg:SETTING.customNormal,
 openBg:SETTING.customOpen,
 outBorder:SETTING.customOutBorder,
 inBorder:SETTING.customInBorder
-}
+};
 }else{
 skin = SKIN_LIST[SETTING.skinIdx];
 }
+
 cell.textContent = "";
 cell.className = "cell";
 cell.style.background = skin.bg;
 cell.style.border = skin.outBorder;
+
 if(SETTING.mode === "fog" && !openMap[r][c]){
 cell.style.opacity = fogOpacity;
 }else{
 cell.style.opacity = 0.95;
 }
+
 if(openMap[r][c]){
+cell.classList.add("open");
 cell.style.background = skin.openBg;
 cell.style.border = skin.inBorder;
 const val = mineMap[r][c];
+
 if(val === -1) cell.textContent = "💣";
 else if(val === -2) cell.textContent = "💥";
 else if(val === 9){ cell.textContent="S"; cell.classList.add("s-mark"); }
 else if(val === 10){
 const bombItem = bombList.find(x=>x.r===r&&x.c===c);
-cell.textContent = bombItem.t;
+cell.textContent = bombItem?.t || 0;
 cell.classList.add("countdown-bomb");
 }
 else if(val === 11){ cell.textContent="★"; cell.classList.add("lucky-cell"); }
@@ -711,6 +813,7 @@ cell.textContent = "🚩";
 cell.textContent = "❓";
 }
 }
+
 function refreshAllCell(){
 const {row,col} = SETTING;
 for(let r=0;r<row;r++){
@@ -719,15 +822,18 @@ refreshCell(r,c);
 }
 }
 }
+
 function updateMineShow(){
 $("#mineNum").innerText = remainMine;
 }
+
 function startTimer(){
 startTime = Date.now();
 timerId = setInterval(()=>{
 const s = Math.floor((Date.now() - startTime)/1000);
 $("#timeNum").innerText = s;
 },1000);
+
 if(SETTING.mode === "countdown"){
 limitTimer = setInterval(()=>{
 limitCountdown--;
@@ -736,47 +842,63 @@ gameOver = true;
 stopAllTimer();
 setFace("lose");
 showAllMine();
+// 禁用所有格子交互
+$$(".cell").forEach(cell => {
+cell.style.pointerEvents = "none";
+cell.style.opacity = 0.7;
+});
 alert("限时结束，挑战失败");
 }
 },1000);
 }
 }
+
 function stopTimer(){
 clearInterval(timerId);
 timerId = null;
 startTime = null;
 $("#timeNum").innerText = "0";
 }
+
 function stopAllTimer(){
 stopTimer();
 clearInterval(limitTimer);
 }
+
 function toggleFlag(r,c){
 if(gameOver || openMap[r][c]) return;
+
 const now = Date.now();
 if(now - lastOperate < SETTING.delay) return;
 lastOperate = now;
+
 if(SETTING.useQmark && !flagMap[r][c]){
 qMap[r][c] = !qMap[r][c];
 playAudio("flag");
 refreshCell(r,c);
 return;
 }
+
 const isRealMine = mineMap[r][c] === -1 || mineMap[r][c] === -2;
 const oldFlag = flagMap[r][c];
 flagMap[r][c] = !oldFlag;
 playAudio("flag");
+
 if(!oldFlag && isRealMine) remainMine--;
 else if(oldFlag && isRealMine) remainMine++;
+
 updateMineShow();
 refreshCell(r,c);
 checkWin();
 }
+
 function openCell(r,c){
 if(gameOver || openMap[r][c] || flagMap[r][c]) return;
+
 const now = Date.now();
 if(now - lastOperate < SETTING.delay) return;
 lastOperate = now;
+
 const openedTotal = openMap.flat().filter(v=>v).length;
 if(openedTotal === 0){
 startTimer();
@@ -791,6 +913,7 @@ mineMap[r][c] = 0;
 fillNumber();
 }
 }
+
 const val = mineMap[r][c];
 if(val === -1){
 gameOver = true;
@@ -800,9 +923,14 @@ setFace("lose");
 openMap[r][c] = true;
 refreshCell(r,c);
 showAllMine();
+// 禁用所有格子交互
+$$(".cell").forEach(cell => {
+cell.style.pointerEvents = "none";
+});
 alert("踩到地雷，游戏结束");
 return;
 }
+
 if(val === -2){
 gameOver = true;
 stopAllTimer();
@@ -812,19 +940,38 @@ const group = chainMineList.find(g=>g.some(p=>p.r===r&&p.c===c));
 group.forEach(p=>{
 openMap[p.r][p.c] = true;
 refreshCell(p.r,p.c);
-})
+});
 showAllMine();
+// 禁用所有格子交互
+$$(".cell").forEach(cell => {
+cell.style.pointerEvents = "none";
+});
 alert("触发连锁地雷");
 return;
 }
+
 if(val === 10){
 playAudio("special");
 const bombItem = bombList.find(x=>x.r===r&&x.c===c);
+if(bombItem){
 bombItem.t--;
+if(bombItem.t <= 0){
+gameOver = true;
+stopAllTimer();
+setFace("lose");
+showAllMine();
+$$(".cell").forEach(cell => {
+cell.style.pointerEvents = "none";
+});
+alert("炸弹爆炸，游戏结束");
+return;
+}
+}
 openMap[r][c] = true;
 refreshCell(r,c);
 return;
 }
+
 if(val === 11){
 playAudio("special");
 remainMine = Math.max(0, remainMine - 2);
@@ -832,27 +979,44 @@ updateMineShow();
 openMap[r][c] = true;
 refreshCell(r,c);
 }
+
 if(val === 12){
 playAudio("special");
 openMap[r][c] = true;
 refreshCell(r,c);
 gameOver = true;
-setTimeout(()=>{gameOver = false;},4000);
+$$(".cell").forEach(cell => {
+cell.style.pointerEvents = "none";
+cell.style.opacity = 0.8;
+});
+setTimeout(()=>{
+gameOver = false;
+$$(".cell").forEach(cell => {
+cell.style.pointerEvents = "auto";
+cell.style.opacity = 0.95;
+});
+},4000);
 return;
 }
+
 playAudio("click");
 openMap[r][c] = true;
 refreshCell(r,c);
+
 if(SETTING.autoOpen && val === 0){
 spreadOpen(r,c);
 }
+
 checkWin();
 }
+
 function spreadOpen(r,c){
 const {row,col} = SETTING;
-if(r<0||r>=row||c<0||c>=col||openMap[r][c]||flagMap[r][c]) return;
+if(r<0||r>=row||c<0||c>=col||openMap[r][c]||flagMap[r][c]||gameOver) return;
+
 openMap[r][c] = true;
 refreshCell(r,c);
+
 if(mineMap[r][c] === 0){
 for(let dr=-1;dr<=1;dr++){
 for(let dc=-1;dc<=1;dc++){
@@ -861,6 +1025,7 @@ spreadOpen(r+dr, c+dc);
 }
 }
 }
+
 function showAllMine(){
 $$(".cell").forEach(el=>{
 const r = Number(el.dataset.r);
@@ -869,38 +1034,69 @@ if(mineMap[r][c]===-1 || mineMap[r][c]===-2){
 openMap[r][c] = true;
 refreshCell(r,c);
 }
-})
+});
 }
+
+// 优化胜利/失败判定逻辑
 function checkWin(){
 if(gameOver) return;
-const total = SETTING.row * SETTING.col;
-let safeNum = total - SETTING.mine;
-if(SETTING.chainMine) safeNum -= chainMineList.length * 5;
-const opened = openMap.flat().filter(v=>v).length;
-if(opened >= safeNum){
+
+const totalCells = SETTING.row * SETTING.col;
+// 计算总地雷数（普通雷+连锁雷）
+const totalMines = SETTING.mine + chainMineList.flat().length;
+// 安全格子数 = 总格子数 - 总地雷数
+const safeCells = totalCells - totalMines;
+// 已翻开的安全格子数
+const openedSafeCells = openMap.flat().filter((opened, idx) => {
+const r = Math.floor(idx / SETTING.col);
+const c = idx % SETTING.col;
+return opened && mineMap[r][c] >= 0;
+}).length;
+
+// 判定胜利条件：已翻开所有安全格子
+if(openedSafeCells >= safeCells){
 gameOver = true;
 stopAllTimer();
 playAudio("win");
 setFace("win");
+// 禁用所有格子交互
+$$(".cell").forEach(cell => {
+cell.style.pointerEvents = "none";
+});
 const cost = Number($("#timeNum").innerText);
 saveRank(cost);
 alert(`通关成功！用时${cost}秒`);
 }
 }
+
 const SET_KEY = "mine_setting_data";
 const SAVE_KEY = "mine_game_save";
+
+// 优化本地存储逻辑 - 增加错误处理
 function saveSetting(){
+try {
 localStorage.setItem(SET_KEY, JSON.stringify(SETTING));
+} catch (e) {
+console.warn("保存设置失败:", e);
 }
+}
+
 function loadSetting(){
+try {
 const str = localStorage.getItem(SET_KEY);
 if(str){
 const obj = JSON.parse(str);
-SETTING = Object.assign(SETTING, obj);
+// 深度合并设置，避免丢失新添加的配置项
+SETTING = Object.assign({}, SETTING, obj);
 }
+} catch (e) {
+console.warn("加载设置失败，使用默认值:", e);
+}
+
 document.body.style.background = SETTING.customBodyBg;
 syncInputValue();
 }
+
 function syncInputValue(){
 $("#rowInput").value = SETTING.row;
 $("#colInput").value = SETTING.col;
@@ -926,159 +1122,349 @@ $("#sBoom").checked = SETTING.sBoom;
 $("#sWin").checked = SETTING.sWin;
 $("#sSpecial").checked = SETTING.sSpecial;
 }
+
 function getRankList(){
+try {
 const key = "mine_rank_" + SETTING.mode;
 const str = localStorage.getItem(key);
 return str ? JSON.parse(str) : [];
+} catch (e) {
+console.warn("获取排行榜失败:", e);
+return [];
 }
+}
+
 function saveRank(time){
+try {
 let list = getRankList();
 list.push(time);
 list.sort((a,b)=>a-b);
 list = list.slice(0,10);
 localStorage.setItem("mine_rank_" + SETTING.mode, JSON.stringify(list));
 renderRank();
+} catch (e) {
+console.warn("保存排行榜失败:", e);
 }
+}
+
 function renderRank(){
 const list = getRankList();
-const wrap = $("#rankList");
+const wrap = document.createElement("div");
+wrap.id = "rankList";
+// 如果页面中已有rankList，替换它
+const existingWrap = $("#rankList");
+if(existingWrap){
+existingWrap.parentNode.replaceChild(wrap, existingWrap);
+}else{
+// 添加到数据管理标签页
+$(".tab-panel[data-panel='data']").appendChild(wrap);
+}
+
 if(list.length === 0){
 wrap.innerHTML = "<div>暂无通关记录</div>";
 return;
 }
+
 let html = "";
 list.forEach((t,i)=>{
 html += `<div>第${i+1}名：${t} 秒</div>`;
-})
+});
 wrap.innerHTML = html;
 }
+
 function saveCurrentGame(){
+try {
 const saveData = {
 mineMap,openMap,flagMap,qMap,chainMineList,bombList,luckyList,freezeList,
-remainMine,time:$("#timeNum").innerText
+remainMine,time:$("#timeNum").innerText,
+setting: {...SETTING} // 保存当前设置
 };
 localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
 alert("存档已保存");
+} catch (e) {
+console.warn("保存游戏失败:", e);
+alert("保存失败：" + e.message);
 }
+}
+
 function loadCurrentGame(){
+try {
 const str = localStorage.getItem(SAVE_KEY);
 if(!str){
 alert("无存档");
 return;
 }
+
 gameOver = true;
 stopAllTimer();
+
 const data = JSON.parse(str);
-mineMap=data.mineMap;openMap=data.openMap;flagMap=data.flagMap;qMap=data.qMap;
-chainMineList=data.chainMineList;bombList=data.bombList;luckyList=data.luckyList;freezeList=data.freezeList;
-remainMine=data.remainMine;$("#timeNum").innerText=data.time;
+mineMap = data.mineMap || [];
+openMap = data.openMap || [];
+flagMap = data.flagMap || [];
+qMap = data.qMap || [];
+chainMineList = data.chainMineList || [];
+bombList = data.bombList || [];
+luckyList = data.luckyList || [];
+freezeList = data.freezeList || [];
+remainMine = data.remainMine || 0;
+$("#timeNum").innerText = data.time || "0";
+
+// 恢复存档的设置
+if(data.setting){
+SETTING = Object.assign(SETTING, data.setting);
+syncInputValue();
+}
+
 gameOver = false;
 renderBoard();
 updateMineShow();
 alert("存档读取完成");
+} catch (e) {
+console.warn("加载游戏失败:", e);
+alert("加载失败：" + e.message);
 }
+}
+
 function gameReset(){
 stopAllTimer();
+// 恢复格子交互
+$$(".cell").forEach(cell => {
+cell.style.pointerEvents = "auto";
+cell.style.opacity = 0.95;
+});
 initMapData();
 buildAllBlock();
 renderBoard();
 renderRank();
 }
+
 function bindAllEvent(){
+// 设置弹窗
 $("#openSet").onclick = ()=>$("#mask").classList.add("show");
 $("#closeSet").onclick = ()=>$("#mask").classList.remove("show");
 $("#mask").onclick = function(e){
 if(e.target === $("#mask")) $("#mask").classList.remove("show");
-}
+};
+
+// 重置游戏
 $("#faceBtn").onclick = gameReset;
+
+// 应用自定义参数
 $("#applyCustom").onclick = function(){
-SETTING.row = parseInt($("#rowInput").value);
-SETTING.col = parseInt($("#colInput").value);
-SETTING.mine = parseInt($("#mineInput").value);
-SETTING.cellSize = parseInt($("#cellSizeSel").value);
+const row = parseInt($("#rowInput").value);
+const col = parseInt($("#colInput").value);
+const mine = parseInt($("#mineInput").value);
+const cellSize = parseInt($("#cellSizeSel").value);
+
+// 验证输入
+if(isNaN(row) || isNaN(col) || isNaN(mine) || isNaN(cellSize)){
+alert("请输入有效的数字");
+return;
+}
+
+SETTING.row = Math.max(3, Math.min(40, row));
+SETTING.col = Math.max(3, Math.min(40, col));
+SETTING.mine = Math.max(1, Math.min(SETTING.row*SETTING.col-9, mine));
+SETTING.cellSize = Math.max(22, Math.min(30, cellSize));
+
 saveSetting();
 gameReset();
-}
+};
+
+// 快捷难度切换 - 修复格子尺寸未同步问题
 $$(".diff-btn").forEach(btn=>{
 btn.onclick = function(){
 const d = this.dataset.diff;
 if(d === "easy"){
 SETTING.row=9;SETTING.col=9;SETTING.mine=10;
+SETTING.cellSize = 26; // 同步格子尺寸
 }else if(d === "normal"){
 SETTING.row=16;SETTING.col=16;SETTING.mine=40;
+SETTING.cellSize = 26; // 同步格子尺寸
 }else{
 SETTING.row=16;SETTING.col=30;SETTING.mine=99;
+SETTING.cellSize = 24; // 困难模式使用更小的格子
 }
+
+// 更新下拉框值
+$("#cellSizeSel").value = SETTING.cellSize;
 saveSetting();
 gameReset();
-}
-})
+};
+});
+
+// 触屏设置
 $("#longPressTime").addEventListener("input", function(){
-SETTING.longPress = Number(this.value);
+const val = Number(this.value);
+if(!isNaN(val)){
+SETTING.longPress = Math.max(300, Math.min(1500, val));
 saveSetting();
+}
 });
+
 $("#delayTime").addEventListener("input", function(){
-SETTING.delay = Number(this.value);
+const val = Number(this.value);
+if(!isNaN(val)){
+SETTING.delay = Math.max(50, Math.min(500, val));
 saveSetting();
+}
 });
+
+// 游戏模式
 $("#gameModeSel").addEventListener("change", function(){
 SETTING.mode = this.value;
 saveSetting();
 gameReset();
 });
+
 $("#limitTimeInput").addEventListener("input", function(){
-SETTING.limitTime = Number(this.value);
+const val = Number(this.value);
+if(!isNaN(val)){
+SETTING.limitTime = Math.max(30, Math.min(999, val));
 saveSetting();
+}
 });
+
+// 音量滑块 - 修复数值显示延迟
 $("#volRange").addEventListener("input", function(){
-SETTING.volume = Number(this.value);
-$("#volNum").innerText = SETTING.volume + "%";
+const val = Number(this.value);
+if(!isNaN(val)){
+SETTING.volume = val;
+$("#volNum").innerText = val + "%"; // 实时更新
+saveSetting();
+}
+});
+
+// 开关设置
+$("#muteAll").addEventListener("change", function(){
+SETTING.mute = this.checked;
 saveSetting();
 });
-$("#muteAll").addEventListener("change", function(){SETTING.mute=this.checked;saveSetting();});
-$("#chainMineSwitch").addEventListener("change", function(){SETTING.chainMine=this.checked;saveSetting();});
-$("#bombSwitch").addEventListener("change", function(){SETTING.bomb=this.checked;saveSetting();});
-$("#luckySwitch").addEventListener("change", function(){SETTING.lucky=this.checked;saveSetting();});
-$("#freezeSwitch").addEventListener("change", function(){SETTING.freeze=this.checked;saveSetting();});
-$("#autoOpen").addEventListener("change", function(){SETTING.autoOpen=this.checked;saveSetting();});
-$("#firstSafe").addEventListener("change", function(){SETTING.firstSafe=this.checked;saveSetting();});
+
+$("#chainMineSwitch").addEventListener("change", function(){
+SETTING.chainMine = this.checked;
+saveSetting();
+});
+
+$("#bombSwitch").addEventListener("change", function(){
+SETTING.bomb = this.checked;
+saveSetting();
+});
+
+$("#luckySwitch").addEventListener("change", function(){
+SETTING.lucky = this.checked;
+saveSetting();
+});
+
+$("#freezeSwitch").addEventListener("change", function(){
+SETTING.freeze = this.checked;
+saveSetting();
+});
+
+$("#autoOpen").addEventListener("change", function(){
+SETTING.autoOpen = this.checked;
+saveSetting();
+});
+
+$("#firstSafe").addEventListener("change", function(){
+SETTING.firstSafe = this.checked;
+saveSetting();
+});
+
 $("#useQmark").addEventListener("change", function(){
 SETTING.useQmark = this.checked;
 saveSetting();
 refreshAllCell();
 });
-$("#sClick").addEventListener("change", function(){SETTING.sClick=this.checked;saveSetting();});
-$("#sFlag").addEventListener("change", function(){SETTING.sFlag=this.checked;saveSetting();});
-$("#sBoom").addEventListener("change", function(){SETTING.sBoom=this.checked;saveSetting();});
-$("#sWin").addEventListener("change", function(){SETTING.sWin=this.checked;saveSetting();});
-$("#sSpecial").addEventListener("change", function(){SETTING.sSpecial=this.checked;saveSetting();});
+
+// 音效开关
+$("#sClick").addEventListener("change", function(){
+SETTING.sClick = this.checked;
+saveSetting();
+});
+
+$("#sFlag").addEventListener("change", function(){
+SETTING.sFlag = this.checked;
+saveSetting();
+});
+
+$("#sBoom").addEventListener("change", function(){
+SETTING.sBoom = this.checked;
+saveSetting();
+});
+
+$("#sWin").addEventListener("change", function(){
+SETTING.sWin = this.checked;
+saveSetting();
+});
+
+$("#sSpecial").addEventListener("change", function(){
+SETTING.sSpecial = this.checked;
+saveSetting();
+});
+
+// 存档/读档
 $("#saveGame").onclick = saveCurrentGame;
 $("#loadGame").onclick = loadCurrentGame;
+
+// 数据管理
 $("#clearRank").onclick = function(){
+try {
 localStorage.removeItem("mine_rank_" + SETTING.mode);
 renderRank();
 alert("当前排行已清空");
+} catch (e) {
+console.warn("清空排行失败:", e);
+alert("清空失败：" + e.message);
 }
+};
+
 $("#clearAllData").onclick = function(){
 if(confirm("确定清空所有设置、存档、排行？无法恢复！")){
+try {
 localStorage.clear();
 location.reload();
+} catch (e) {
+console.warn("清空数据失败:", e);
+alert("清空失败：" + e.message);
 }
 }
+};
+
+// 快捷键
 document.addEventListener("keydown", function(e){
 const key = e.key.toLowerCase();
 switch(key){
-case "r": gameReset(); break;
+case "r": 
+e.preventDefault();
+gameReset(); 
+break;
 case "m":
+e.preventDefault();
 SETTING.mute = !SETTING.mute;
 $("#muteAll").checked = SETTING.mute;
 saveSetting();
 break;
-case " ": gameReset(); break;
-case "escape": $("#mask").classList.remove("show"); break;
+case " ": 
+e.preventDefault();
+gameReset(); 
+break;
+case "escape": 
+e.preventDefault();
+$("#mask").classList.remove("show"); 
+break;
 }
-})
+});
+
+// 关闭更新日志
+$("#logCloseBtn").onclick = function(){
+$("#logMask").classList.remove("show");
+localStorage.setItem(VERSION_STORAGE_KEY, GAME_VERSION);
+};
 }
+
+// 页面加载完成
 window.onload = function(){
 initUpdateLog();
 loadSetting();
@@ -1087,7 +1473,17 @@ bindTabSwitch();
 bindColorPanel();
 bindAllEvent();
 gameReset();
+
+// 初始化排行榜
+renderRank();
+};
+
+// 窗口大小变化时重新渲染棋盘
+window.addEventListener("resize", function(){
+if(!gameOver){
+renderBoard();
 }
+});
 </script>
 </body>
 </html>
