@@ -99,7 +99,7 @@
             border-width: 2px;
             transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
-            overflow: hidden
+            overflow: auto
         }
 
         .cell.open {
@@ -200,7 +200,7 @@
             max-height: 86vh;
             background: #fffffada;
             border-radius: 8px;
-            overflow: hidden;
+            overflow: auto;
             display: flex;
             flex-direction: column;
             /* 初始状态统一过渡曲线，减小弹跳幅度 */
@@ -275,7 +275,7 @@
             position: relative;
             /* 固定最小高度，切换不会上下抖动 */
             min-height: 300px;
-            overflow: hidden;
+            overflow: auto;
         }
 
         .tab-panel {
@@ -343,7 +343,7 @@
             font-size: 14px;
             transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
-            overflow: hidden;
+            overflow: auto;
         }
 
         .btn-sm:hover {
@@ -374,7 +374,7 @@
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
-            overflow: hidden;
+            overflow: auto;
         }
 
         .skin-item:hover {
@@ -716,34 +716,12 @@
         <div class="log-box">
             <button class="log-close" id="logCloseBtn">×</button>
             <div class="log-title">
-                v2.5.1 更新日志
+                v2.5.2 更新日志
             </div>
             <div class="log-content">
                 <ul>
-                    <li style="font-size: 12px">✨ 颜色稍作更换，带来全新体验~</li>
-                    <li style="font-size: 12px">✨ 启用自研弹窗，不再使用浏览器原生弹窗~</li>
-                    <li style="font-size: 12px">✨ 本次一共修复 21 个 BUG~</li>
-                    <li style="font-size: 7px"> - CVE-2026-68401 修复胜利统计异常，无法通关问题</li>
-                    <li style="font-size: 7px"> - CVE-2026-68402 修复首次点击可能触发特殊格子暴毙</li>
-                    <li style="font-size: 7px"> - CVE-2026-68403 修复炸弹倒计时数字不自动刷新</li>
-                    <li style="font-size: 7px"> - CVE-2026-68404 修复幸运方块只减显示雷数，实际未清除</li>
-                    <li style="font-size: 7px"> - CVE-2026-68405 修复冰冻格子解锁后仍无法点击</li>
-                    <li style="font-size: 7px"> - CVE-2026-68406 优化触屏滑动判定，插旗更稳定</li>
-                    <li style="font-size: 7px"> - CVE-2026-68407 修复触摸锁死导致无法操作</li>
-                    <li style="font-size: 7px"> - CVE-2026-68408 修复问号标记与插旗逻辑冲突</li>
-                    <li style="font-size: 7px"> - CVE-2026-68409 修复自定义颜色边框样式错乱</li>
-                    <li style="font-size: 7px"> - CVE-2026-68410 修复皮肤切换状态显示不同步</li>
-                    <li style="font-size: 7px"> - CVE-2026-68411 修复格子尺寸修改不即时刷新</li>
-                    <li style="font-size: 7px"> - CVE-2026-68412 修复存档读档后计时数值丢失</li>
-                    <li style="font-size: 7px"> - CVE-2026-68413 修复切换模式排行榜不刷新</li>
-                    <li style="font-size: 7px"> - CVE-2026-68414 修复窗口缩放导致标记清空</li>
-                    <li style="font-size: 7px"> - CVE-2026-68415 修复更新日志重复弹出</li>
-                    <li style="font-size: 7px"> - CVE-2026-68416 修复快捷键未解除触摸锁定</li>
-                    <li style="font-size: 7px"> - CVE-2026-68417 修复行列输入异常数值导致错乱</li>
-                    <li style="font-size: 7px"> - CVE-2026-68418 修复地雷过多时页面卡死</li>
-                    <li style="font-size: 7px"> - CVE-2026-68419 修复插旗、幸运格导致雷数变负</li>
-                    <li style="font-size: 7px"> - CVE-2026-68420 新增全局防负数雷数兜底</li>
-                    <li style="font-size: 7px"> - CVE-2026-68421 修复清空排行无确认易误触</li>
+                    <li style="font-size: 12px">✨ 本次一共修复 1 个 BUG~</li>
+                    <li style="font-size: 7px"> - CVE‑2026‑68422 日志无法滚动，某些页面无法正常显示~</li>
                     <li style="font-size: 12px; color: #47c4ab; word-break: break-all;">反馈邮箱：hzt123321123@163.com</li>
                 </ul>
             </div>
@@ -976,7 +954,7 @@
                 </div>
                 <div class="tab-panel" data-panel="about">
                     <div class="about-content" style="padding: 12px; line-height: 1.8; font-size: 14px;">
-                        <div style="margin-bottom: 8px;">当前版本：v2.5.1 （2026.08.04 04:13）</div>
+                        <div style="margin-bottom: 8px;">当前版本：v2.5.2 （2026.08.11 05:53）</div>
                         <div style="margin-bottom: 8px;">制作团队：Leathy工作室</div>
                         <div style="margin-bottom: 8px; font-size: 13px;">本游戏由 [Leathy工作室] 开发，旨在为玩家带来经典扫雷的乐趣，不断优化体验，欢迎大家游玩~</div>
                         <div style="font-size: 12px; color: #47c4ab; word-break: break-all;">如果你有宝贵的建议，请反馈到这个邮箱：hzt123321123@163.com</div>
@@ -994,7 +972,7 @@
         </div>
     </div>
     <script>
-        const GAME_VERSION = "v2.5.1";
+        const GAME_VERSION = "v2.5.2";
         const VERSION_STORAGE_KEY = "mine_game_version";
         // 全局触摸修复变量
         let touchLock = false;
